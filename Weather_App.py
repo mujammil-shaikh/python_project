@@ -1,28 +1,28 @@
+from bs4 import BeautifulSoup
 import requests
 import tkinter as tk
 from tkinter import messagebox
 
-# OpenWeatherMap API key (replace 'YOUR_API_KEY' with your actual API key)
-API_KEY = 'e6cda75e0bd3f5a735ea21d51ed6abc9'
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
 
 def get_weather(city):
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
-    response = requests.get(url)
-    data = response.json()
+    city = city.replace(" ", "+")
+    res = requests.get(
+        f'https://www.google.com/search?q={city}+weather', headers=headers)
+    soup = BeautifulSoup(res.text, 'html.parser')
 
-    print(data)  # Add this line to check the API response
+    location_elem = soup.select('.BNeawe.iBp4i.AP7Wnd')[0]
+    location = location_elem.text.strip()
 
-    if data['cod'] == '404':
-        messagebox.showerror("Error", "City not found.")
-    elif 'weather' in data:
-        weather_description = data['weather'][0]['description']
-        temperature = data['main']['temp']
-        humidity = data['main']['humidity']
+    weather_elem = soup.select('.BNeawe.tAd8D.AP7Wnd')[0]
+    weather_info = weather_elem.text.strip()
 
-        messagebox.showinfo("Weather Information",
-                            f"City: {city}\nWeather: {weather_description}\nTemperature: {temperature}°C\nHumidity: {humidity}%")
-    else:
-        messagebox.showerror("Error", "Weather information not available. Please try again later.")
+    temperature_elem = soup.select('.BNeawe.iBp4i.AP7Wnd')[1]
+    temperature = temperature_elem.text.strip()
+
+    messagebox.showinfo("Weather Information",
+                        f"City: {location}\nWeather: {weather_info}\nTemperature: {temperature}")
 
 def show_weather():
     city = city_entry.get()
